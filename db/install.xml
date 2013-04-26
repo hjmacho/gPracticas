@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--  Copyright (C) 2012  Héctor J. Macho Pedroso <hjmacho@outlook.com>
+      This file is part of gPracticas.
+
+	  gPracticas is free software: you can redistribute it and/or modify
+	  it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+
+      gPracticas is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with gPracticas.  If not, see <http://www.gnu.org/licenses/>-->
+<XMLDB PATH="blocks/gpracticas/db" VERSION="20120407" COMMENT="XMLDB file for Moodle blocks/gpracticas"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+	  
+  <TABLES>
+    <TABLE NAME="gpracticas_practices" COMMENT="Tabla encargada de guardar la información referente a las prácticas" NEXT="gpracticas_deliveries">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="subject"/>
+        <FIELD NAME="subject" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" ENUM="false" COMMENT="ID de la asignatura a la que pertenece la práctica" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" COMMENT="Nombre de la práctica" PREVIOUS="subject" NEXT="academiccourse"/>
+        <FIELD NAME="academiccourse" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" COMMENT="Curso académico" PREVIOUS="name" NEXT="examinationsession"/>
+        <FIELD NAME="examinationsession" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" COMMENT="examinationsession a la que pertenece la práctica" PREVIOUS="academiccourse" NEXT="flexible"/>
+        <FIELD NAME="flexible" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="Si la práctica admite plazo de entrega flexible" PREVIOUS="examinationsession" NEXT="ending_date"/>
+        <FIELD NAME="ending_date" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" COMMENT="Fin del plazo de entrega de la práctica" PREVIOUS="flexible" NEXT="visible"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="ending_date" NEXT="description"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="visible" NEXT="idcalendar"/>
+        <FIELD NAME="idcalendar" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" ENUM="false" PREVIOUS="description" NEXT="security_key"/>
+        <FIELD NAME="security_key" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="idcalendar" NEXT="autounzip"/>
+        <FIELD NAME="autounzip" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" ENUM="false" PREVIOUS="security_key" NEXT="reopen"/>
+        <FIELD NAME="reopen" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" ENUM="false" PREVIOUS="autounzip"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="subject"/>
+        <KEY NAME="subject" TYPE="foreign" FIELDS="subject" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary" NEXT="idcalendar"/>
+        <KEY NAME="idcalendar" TYPE="foreign" FIELDS="idcalendar" REFTABLE="event" REFFIELDS="id" PREVIOUS="subject"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="gpracticas_deliveries" COMMENT="Entregas de la práctica por parte del alumno" PREVIOUS="gpracticas_practices">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="student"/>
+        <FIELD NAME="student" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" ENUM="false" COMMENT="ID del alumno que realiza la entrega" PREVIOUS="id" NEXT="practice"/>
+        <FIELD NAME="practice" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" ENUM="false" COMMENT="ID de la práctica a la que corresponde la entrega" PREVIOUS="student" NEXT="in_closing_date"/>
+        <FIELD NAME="in_closing_date" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="Si la práctica se ha entregado dentro de plazo" PREVIOUS="practice" NEXT="delivery_date"/>
+        <FIELD NAME="delivery_date" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" COMMENT="Fecha de la última modificación de la práctica" PREVIOUS="in_closing_date" NEXT="mark"/>
+        <FIELD NAME="mark" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="-" SEQUENCE="false" ENUM="false" COMMENT="Nota de la práctica" PREVIOUS="delivery_date" NEXT="comments"/>
+        <FIELD NAME="comments" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Comentarios acerca de la práctica" PREVIOUS="mark" NEXT="student_comments"/>
+        <FIELD NAME="student_comments" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="comments"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="student"/>
+        <KEY NAME="student" TYPE="foreign" FIELDS="student" REFTABLE="user" REFFIELDS="id" PREVIOUS="primary" NEXT="practice"/>
+        <KEY NAME="practice" TYPE="foreign" FIELDS="practice" REFTABLE="gpractices_practices" REFFIELDS="id" PREVIOUS="student"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

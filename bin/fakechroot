@@ -1,0 +1,137 @@
+#!/bin/sh
+
+#  Copyright (C) 2012  Héctor J. Macho Pedroso <hjmacho@outlook.com>
+#
+#  This script is based in the version 2.14 of fakechroot <https://github.com/fakechroot/fakechroot>
+#
+#  This file is part of gPracticas.
+#
+#  gPracticas is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  gPracticas is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with gPracticas.  If not, see <http://www.gnu.org/licenses/>
+
+
+usage () {
+cat - >&2 <<EOF
+fakechroot, create a fake chroot environment.
+   usage: fakechroot [-l|--lib fakechrootlib]
+                     [-s|--use-system-libs]
+                     [-h|--help] [-v|--version]
+                     [--] [command]
+EOF
+  exit 1
+}
+
+LIB=libfakechroot.so
+PATHS=$1/lib:$1/lib64
+shift
+
+FAKECHROOT=true
+export FAKECHROOT
+
+FAKECHROOT_VERSION=2.16
+export FAKECHROOT_VERSION
+
+FAKECHROOT_EXCLUDE_PATH=/bin:/usr/bin
+export FAKECHROOT_EXCLUDE_PATH
+
+FAKECHROOT_BASE=$1
+export FAKECHROOT_BASE
+shift
+
+libfound=no
+
+GETOPTEST=`getopt --version`
+case $GETOPTEST in
+getopt*) # GNU getopt
+    TEMP=`getopt -l lib: -l use-system-libs -l version -l help -- +l:svh "$@"`
+    ;;
+*) # POSIX getopt ?
+    TEMP=`getopt l:svh "$@"`
+    ;;
+esac
+
+if test "$?" -ne 0; then
+  usage
+fi
+
+eval set -- "$TEMP"
+
+while test "X$1" != "X--"; do
+  case "$1" in
+    -l|--lib)
+       shift
+       LIB=`eval echo "$1"`
+       PATHS=
+       ;;
+    -v|--version)
+       echo "fakechroot version 2.14"
+       exit 0
+       ;;
+    -s|--use-system-libs)
+       PATHS="$PATHS:/usr/lib:/lib"
+       ;;
+    -h|--help)
+       usage
+       ;;
+  esac
+  shift
+done
+
+shift #get rid of the '--'
+
+# make sure the preload is available
+if [ -n "$PATHS" ]
+then
+    for dir in `echo $PATHS | sed 's/:/ /g'`
+    do
+	if test -r "$dir/$LIB"
+	then
+	    libfound=yes
+	fi
+    done
+else
+    if test -r "$LIB"
+    then
+	libfound=yes
+    fi
+fi
+
+if test $libfound = no
+then
+    echo >&2 "fakechroot: preload library not found, aborting."
+    exit 1
+fi
+
+# Keep other library paths
+if test -n "$LD_LIBRARY_PATH"; then
+  PATHS="$PATHS:$LD_LIBRARY_PATH"
+fi
+# ...and preloaded libs
+if test -n "$LD_PRELOAD"; then
+  LIB="$LIB $LD_PRELOAD"
+fi
+
+if test -z "$*"; then
+  LD_LIBRARY_PATH="$PATHS"
+  LD_PRELOAD="$LIB"
+  export LD_LIBRARY_PATH LD_PRELOAD
+  exec ${SHELL:-/bin/sh}
+else
+  LD_LIBRARY_PATH="$PATHS"
+  LD_PRELOAD="$LIB"
+  echo $@ > ~/log.txt
+  export LD_LIBRARY_PATH LD_PRELOAD
+  exec "$@"
+fi
+
+exit 1

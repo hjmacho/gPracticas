@@ -1,0 +1,41 @@
+<!--  Copyright (C) 2012  Héctor J. Macho Pedroso <hjmacho@outlook.com>
+      This file is part of gPracticas.
+
+	  gPracticas is free software: you can redistribute it and/or modify
+	  it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+
+      gPracticas is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with gPracticas.  If not, see <http://www.gnu.org/licenses/>-->
+	  
+<table cellpadding="9" cellspacing="0">
+<tr valign="top">
+    <td align="right">
+        <p><?php echo "Convocatoria (Ejemplo: Mayo, Junio, ...)"; ?>:
+    </td>
+    <td>
+        <input type="text" name="examinationsession" size="30" value="<?php echo $this->config->examinationsession; ?>" />
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right">
+        <p><?php echo "Curso académico (Ejemplo: 2010, 2010-11, ...)"; ?>:
+    </td>
+    <td>
+        <input type="text" name="academiccourse" size="30" value="<?php echo $this->config->academiccourse; ?>" />
+    </td>
+</tr>
+<tr>
+    <td colspan="2" align="center">
+
+        <input type="submit" value="Guardar" />
+    </td>
+</tr>
+</table>
+<?php use_html_editor(); ?>
